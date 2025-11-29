@@ -18,5 +18,12 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  // ✅ 添加这个 Vercel 配置节
+  "vercel": {
+    "buildCommand": "npm run build",
+    "outputDirectory": ".next",
+    "devCommand": "npm run dev",
+    "cleanUrls": true
   }
 }
