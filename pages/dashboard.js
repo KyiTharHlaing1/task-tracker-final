@@ -21,11 +21,23 @@ export default function Dashboard() {
     const userData = localStorage.getItem('user');
     
     if (!token || !userData) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       router.push('/login');
       return;
     }
-    
-    setUser(JSON.parse(userData));
+
+    try {
+      const parsed = JSON.parse(userData);
+      if (!parsed) throw new Error('No user data');
+      setUser(parsed);
+    } catch (e) {
+      // bad/malformed user in localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      router.push('/login');
+      return;
+    }
     fetchTasks();
   }, []);
 
@@ -210,11 +222,8 @@ export default function Dashboard() {
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <span style={{ 
-            color: '#2d3436',
-            fontSize: '16px'
-          }}>
-            Welcome, <strong>{user.name}</strong>
+          <span style={{ color: '#2d3436', fontSize: '16px' }}>
+            Welcome, <strong>{user.name || user.email || 'User'}</strong>
           </span>
           <button 
             onClick={handleLogout}

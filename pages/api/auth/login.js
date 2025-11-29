@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
     try {
         // ✅ 修复: 直接调用 query 函数获取数据
-        const users = await query('SELECT id, email, password FROM users WHERE email = ?', [email]);
+        const users = await query('SELECT id, email, password, name FROM users WHERE email = ?', [email]);
         const user = users[0];
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -28,7 +28,11 @@ export default async function handler(req, res) {
 
         const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
 
-        return res.status(200).json({ token, message: 'Login successful' });
+        // Return user object (omit password)
+        const userPayload = { id: user.id, email: user.email };
+        if (user.name) userPayload.name = user.name;
+
+        return res.status(200).json({ token, user: userPayload, message: 'Login successful' });
 
     } catch (error) {
         console.error('Login error:', error);

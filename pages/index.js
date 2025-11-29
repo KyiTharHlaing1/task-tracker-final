@@ -1,47 +1,55 @@
-// 文件: pages/api/tasks/index.js
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 
-import jwt from 'jsonwebtoken';
-import { query } from '../../../lib/db'; // ✅ 修复: 使用 query 命名导出
+export default function Home() {
+    const router = useRouter();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const token = localStorage.getItem('token');
+        if (token) router.replace('/dashboard');
+    }, [router]);
 
-export default async function handler(req, res) {
-    // 简化认证: 确保用户已登录
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
+    return (
+        <div style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#f5f6fa',
+            padding: '20px'
+        }}>
+            <div style={{
+                backgroundColor: 'white',
+                padding: '40px',
+                borderRadius: '10px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                maxWidth: '640px',
+                textAlign: 'center'
+            }}>
+                <h1 style={{ margin: 0, fontSize: '28px', color: '#2d3436' }}>Task Management System</h1>
+                <p style={{ color: '#636e72', marginTop: '12px' }}>Sign in to manage your tasks or create a new account.</p>
 
-    let decoded;
-    try {
-        decoded = jwt.verify(token, JWT_SECRET);
-    } catch (e) {
-        return res.status(401).json({ message: 'Invalid token' });
-    }
-    const userId = decoded.userId;
-
-    try {
-        switch (req.method) {
-            case 'GET':
-                // ✅ 修复: 直接调用 query 函数获取数据
-                const tasks = await query('SELECT * FROM tasks WHERE user_id = ? ORDER BY created_at DESC', [userId]);
-                return res.status(200).json(tasks);
-
-            case 'POST':
-                const { title, description } = req.body;
-                // ✅ 修复: 直接调用 query 函数执行插入
-                const result = await query(
-                    'INSERT INTO tasks (user_id, title, description) VALUES (?, ?, ?)',
-                    [userId, title, description]
-                );
-                return res.status(201).json({ id: result.insertId, title, description, user_id: userId });
-
-            default:
-                res.setHeader('Allow', ['GET', 'POST']);
-                return res.status(405).end(`Method ${req.method} Not Allowed`);
-        }
-    } catch (error) {
-        console.error('Task API error:', error);
-        return res.status(500).json({ message: 'Internal Server Error' });
-    }
+                <div style={{ marginTop: '24px', display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                    <Link href="/login" style={{
+                        padding: '12px 22px',
+                        backgroundColor: '#0984e3',
+                        color: 'white',
+                        borderRadius: '6px',
+                        textDecoration: 'none',
+                        fontWeight: '600'
+                    }}>Login</Link>
+                    <Link href="/register" style={{
+                        padding: '12px 22px',
+                        backgroundColor: '#00b894',
+                        color: 'white',
+                        borderRadius: '6px',
+                        textDecoration: 'none',
+                        fontWeight: '600'
+                    }}>Register</Link>
+                </div>
+            </div>
+        </div>
+    );
 }

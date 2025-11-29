@@ -1,19 +1,13 @@
 // 文件: pages/api/tasks/[id].js
 
-import jwt from 'jsonwebtoken';
 import { query } from '../../../lib/db'; // ✅ 修复: 使用 query 命名导出
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { authenticateToken } from '../../../lib/auth';
 
 export default async function handler(req, res) {
     const { id } = req.query; // 获取任务 ID
-
-    // 简化认证
-    const token = req.headers.authorization?.split(' ')[1];
-    // ... (省略认证逻辑，与 index.js 类似) ...
-    
-    // ... (假设认证成功，获取 userId) ...
-    const userId = 1; // 替换为实际的 decoded.userId
+        const decoded = authenticateToken(req);
+        if (!decoded) return res.status(401).json({ message: 'Unauthorized' });
+        const userId = decoded.userId;
 
     try {
         switch (req.method) {
