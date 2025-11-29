@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.0",
     "mysql2": "^3.6.5",
     "next": "^16.0.5",
     "react": "^19.2.0",
@@ -19,7 +19,6 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  // ✅ 添加这个 Vercel 配置节
   "vercel": {
     "buildCommand": "npm run build",
     "outputDirectory": ".next",
